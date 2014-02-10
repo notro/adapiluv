@@ -1,0 +1,113 @@
+background_image = Image("adapiluv320x240.png");
+background_sprite = Sprite(background_image);
+
+
+#-------------------- Refresh ---------------------------
+
+# Called ~50 times a second
+time = 0;
+fun refresh_callback ()
+{
+	global.time++;
+	if (global.time > 10) {
+		global.time = 0;
+		refresh10();
+	}
+}
+Plymouth.SetRefreshFunction (refresh_callback);
+
+# Called ~5 times a second
+fun refresh10()
+{
+	refresh_plus();
+	refresh_fruit();
+}
+
+
+#-------------------- Plus sign animation ---------------------------
+
+plus.image = Image("plus.png");
+plus.sprite = Sprite(plus.image);
+plus.x = 134-5;
+plus.y = 92-5;
+plus.sprite.SetPosition(plus.x, plus.y, -10);
+
+animate_plus = 0;
+plus_state = 0;
+fun refresh_plus()
+{
+	if (global.animate_plus == 2) {
+		if (global.plus_state == 0) {
+			# Show enlarged plus sign
+			global.plus_state = 1;
+			plus.sprite.SetZ(10);
+		} else {
+			# Hide enlarged plus sign
+			global.plus_state = 0;
+			global.animate_plus = 0;
+			plus.sprite.SetZ(-10);
+		}
+	}
+}
+
+
+#-------------------- Fruit seed animation ---------------------------
+
+# Initialize the blue seed images and hide them
+for (index = 1; index < 6; index++) {
+	seed[index].image = Image("seed" + index + ".png");
+	seed[index].sprite = Sprite(seed[index].image);
+}
+seed[1].sprite.SetPosition(60, 110, -10);
+seed[2].sprite.SetPosition(75, 104, -10);
+seed[3].sprite.SetPosition(81, 116, -10);
+seed[4].sprite.SetPosition(77, 125, -10);
+seed[5].sprite.SetPosition(63, 123, -10);
+
+current_seed = 1;
+seed_state = 1;
+fun refresh_fruit()
+{
+	# Blink the plus sign every other time all the seeds are shown
+	if (current_seed == 6 && seed_state == -1)
+		global.animate_plus++;
+
+	if (current_seed == 6) {
+		current_seed = 1;
+		if (seed_state == -1)
+			seed_state = 1;
+		else
+			seed_state = -1;
+	}
+
+	if (current_seed > 0)
+		seed[current_seed].sprite.SetZ(seed_state);
+
+	if (current_seed > 0)
+		current_seed++;
+}
+
+
+#-------------------- Progress ---------------------------
+
+#fun progress_callback (duration, progress)
+#{
+#	dbg(progress);
+#}
+#Plymouth.SetBootProgressFunction(progress_callback);
+
+
+#-------------------- Debug output ---------------------------
+
+msg = Sprite();
+msg.SetPosition(10, 200, 10000);
+
+fun dbg(text)
+{
+	if (text == "") {
+		msg.SetZ(-10);
+	} else {
+		msg_img = Image.Text(text, 1, 1, 1);
+		msg.SetImage(msg_img);
+	}
+}
